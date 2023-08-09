@@ -6,6 +6,7 @@ contract Web3Button {
     address public lastPresser;
     uint256 public lastPressTimestamp;
     uint256 public balance;
+    event ButtonPressed(address indexed lastPresser);
 
     constructor() {
         owner = msg.sender;
@@ -22,6 +23,8 @@ contract Web3Button {
         lastPresser = msg.sender;
         lastPressTimestamp = block.timestamp;
         balance += msg.value;
+
+        emit ButtonPressed(lastPresser);
     }
 
     function withdraw() external onlyLastPresser {
