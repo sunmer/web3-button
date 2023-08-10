@@ -18,7 +18,7 @@ contract Web3Button {
     }
 
     function press() external payable {
-        require(msg.value == 0.0001 ether, "You need to send exactly 0.0001 Ether");
+        require(msg.value < 0.01 ether, "You need to send at least 0.01 Matic");
 
         lastPresser = msg.sender;
         lastPressTimestamp = block.timestamp;

@@ -1,22 +1,22 @@
 import { useState } from 'react'
 
 import { WagmiConfig, createConfig, configureChains } from 'wagmi'
-import { zkSync } from 'viem/chains'
+import { polygon } from 'viem/chains'
 
 import { publicProvider } from 'wagmi/providers/public'
- 
+
 import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet'
 import { InjectedConnector } from 'wagmi/connectors/injected'
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
- 
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+
 import { Profile } from './Profile'
+import { Winnings } from './Winnings'
+
+import './App.css'
 
 function App() {
   const { chains, publicClient, webSocketPublicClient } = configureChains(
-    [zkSync],
+    [polygon],
     [publicProvider()],
   )
 
@@ -41,36 +41,26 @@ function App() {
     publicClient,
     webSocketPublicClient,
   })
-  
-
-  const [count, setCount] = useState(0)
 
   return (
-    <>
-      <WagmiConfig config={config}>
-        <Profile />
-      </WagmiConfig>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div>
+      <div className="flex space-x-4">
+        <div className="card w-96 bg-base-100 shadow-xl text-left">
+          <figure><img src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg" alt="Shoes" /></figure>
+          <div className="card-body">
+            <h2 className="card-title">Shoes!</h2>
+            <p>If a dog chews shoes whose shoes does he choose?</p>
+            <div className="card-actions justify-end">
+              <button className="btn btn-primary">Buy Now</button>
+            </div>
+          </div>
+        </div>
+        <WagmiConfig config={config}>
+          <Profile />
+          <Winnings />
+        </WagmiConfig>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   )
 }
 
