@@ -13,7 +13,10 @@ contract Web3Button {
     }
 
     modifier onlyLastPresser() {
-        require(msg.sender == lastPresser, "Only the last presser can call this function");
+        require(
+            msg.sender == lastPresser,
+            "Only the last presser can call this function"
+        );
         _;
     }
 
@@ -28,13 +31,16 @@ contract Web3Button {
     }
 
     function withdraw() external onlyLastPresser {
-        require(block.timestamp - lastPressTimestamp >= 60 seconds, "Timeout not reached");
+        require(
+            block.timestamp - lastPressTimestamp >= 60 seconds,
+            "Timeout not reached"
+        );
         require(balance > 0, "Contract balance is empty");
 
         uint256 amountToSend = balance;
         balance = 0;
 
-        (bool success, ) = lastPresser.call{value: amountToSend}("");
+        (bool success, ) = lastPresser.call{ value: amountToSend }("");
         require(success, "Transfer failed");
     }
 

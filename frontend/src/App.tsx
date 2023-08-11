@@ -9,7 +9,7 @@ import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet'
 import { InjectedConnector } from 'wagmi/connectors/injected'
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
 
-import { Profile } from './Profile'
+import { Play } from './Play'
 import { Winnings } from './Winnings'
 
 import './App.css'
@@ -56,7 +56,7 @@ function App() {
           </div>
         </div>
         <WagmiConfig config={config}>
-          <Profile />
+          <Play />
           <Winnings />
         </WagmiConfig>
       </div>
