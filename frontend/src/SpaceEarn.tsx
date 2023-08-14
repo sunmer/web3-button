@@ -19,7 +19,7 @@ const SpaceEarn: React.FC = () => {
       width: 40,
       height: 30,
       speedY: 0,
-      gravity: 0.5,
+      gravity: 0.6,
       jump: -10,
     };
 
@@ -117,7 +117,7 @@ const SpaceEarn: React.FC = () => {
           resetGame();
         }
       });
-
+      
       if (bird.y <= 0) {
         resetGame();
       }
@@ -163,11 +163,8 @@ const SpaceEarn: React.FC = () => {
   }, []);
 
   return (
-    <div className="card w-96 bg-base-100 shadow-xl text-left">
-      <h2 className="card-title">Space game</h2>
-      <div className="card-body">
-        <canvas ref={canvasRef} />
-      </div>
+    <div className="card w-96 p-0 bg-base-100 shadow-xl text-left">
+      <canvas className="rounded-2xl" ref={canvasRef} />
     </div>
   )
 };
