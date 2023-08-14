@@ -11,6 +11,7 @@ import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
 
 import { Play } from './Play'
 import { Winnings } from './Winnings'
+import SpaceEarn from "./SpaceEarn"
 
 import './App.css'
 
@@ -58,6 +59,7 @@ function App() {
         <WagmiConfig config={config}>
           <Play />
           <Winnings />
+          <SpaceEarn />
         </WagmiConfig>
       </div>
     </div>
