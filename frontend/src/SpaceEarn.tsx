@@ -3,6 +3,14 @@ import React, { useRef, useEffect } from 'react';
 const SpaceEarn: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  const rocketImage = new Image();
+  rocketImage.src = 'public/invader.svg';
+  const rocketImageJump = new Image();
+  rocketImageJump.src = 'public/invader-jump.svg';
+
+  const rocketSpeed = 0;
+  const gameSpeed = 2.3;
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -13,48 +21,46 @@ const SpaceEarn: React.FC = () => {
     canvas.width = 400;
     canvas.height = 400;
 
-    const bird = {
+    const rocket = {
       x: canvas.width / 4,
       y: canvas.height / 2,
       width: 40,
-      height: 30,
+      height: 40,
       speedY: 0,
       gravity: 0.6,
-      jump: -10,
+      jump: -8,
     };
 
-    const pipes: { x: number; topHeight: number; bottomY: number; }[] = [];
+    const pipes: { x: number; topHeight: number; bottomY: number }[] = [];
     const pipeWidth = 50;
     const pipeGap = 150;
-    const pipeSpacing = 200;
+    const pipeSpacing = 50;
     let score = 0;
 
-    const stars: { x: number; y: number; radius: number; speed: number; }[] = [];
+    const stars: { x: number; y: number; radius: number; speed: number }[] = [];
 
     for (let i = 0; i < 100; i++) {
       stars.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
         radius: Math.random() * 2,
-        speed: Math.random() * 0.5 + 0.1, // Add speed to stars
+        speed: Math.random() * 0.5 + 0.1,
       });
     }
 
     function drawStars() {
-      if (!canvas || !ctx)
-        return
+      if (!canvas || !ctx) return;
 
-      // Fill the canvas with a dark background color
       ctx.fillStyle = '#000';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       ctx.fillStyle = '#fff';
-      stars.forEach(star => {
-        star.x -= star.speed; // Move stars to the left
+      stars.forEach((star) => {
+        star.x -= star.speed * gameSpeed;
 
         if (star.x < 0) {
-          star.x = canvas.width; // Reset stars that go off the left edge
-          star.y = Math.random() * canvas.height; // Reset y position
+          star.x = canvas.width;
+          star.y = Math.random() * canvas.height;
         }
 
         ctx.beginPath();
@@ -65,44 +71,46 @@ const SpaceEarn: React.FC = () => {
     }
 
     function draw() {
-      if (!ctx || !canvas)
-        return
+      if (!canvas || !ctx) return;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       drawStars();
 
-      // Draw bird
-      ctx.fillStyle = '#f00';
-      ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
+      const isRocketGoingUp = rocket.speedY < 0;
 
-      // Draw pipes
+      if (isRocketGoingUp) {
+        ctx.drawImage(rocketImageJump, rocket.x, rocket.y, rocket.width, rocket.height);
+      } else {
+        ctx.drawImage(rocketImage, rocket.x, rocket.y, rocket.width, rocket.height);
+      }
+
       ctx.fillStyle = '#00f';
-      pipes.forEach(pipe => {
+      pipes.forEach((pipe) => {
         ctx.fillRect(pipe.x, 0, pipeWidth, pipe.topHeight);
         ctx.fillRect(pipe.x, pipe.bottomY, pipeWidth, canvas.height - pipe.bottomY);
       });
 
-      // Draw score
       ctx.fillStyle = '#fff';
       ctx.font = '24px Arial';
       ctx.fillText(`Score: ${score}`, 10, 30);
     }
 
     function update() {
-      if (!canvas)
-        return
+      if (!canvas) return;
 
-      bird.speedY += bird.gravity;
-      bird.y += bird.speedY;
+      rocket.speedY += rocket.gravity;
+      rocket.y += rocket.speedY;
 
-      if (bird.y > canvas.height - bird.height) {
-        bird.y = canvas.height - bird.height;
-        bird.speedY = 0;
+      rocket.x += rocketSpeed * gameSpeed;
+
+      if (rocket.y > canvas.height - rocket.height) {
+        rocket.y = canvas.height - rocket.height;
+        rocket.speedY = 0;
       }
 
-      pipes.forEach(pipe => {
-        pipe.x -= 2;
+      pipes.forEach((pipe) => {
+        pipe.x -= 2 * gameSpeed;
 
         if (pipe.x + pipeWidth < 0) {
           pipes.shift();
@@ -110,15 +118,15 @@ const SpaceEarn: React.FC = () => {
         }
 
         if (
-          bird.x + bird.width > pipe.x &&
-          bird.x < pipe.x + pipeWidth &&
-          (bird.y < pipe.topHeight || bird.y + bird.height > pipe.bottomY)
+          rocket.x + rocket.width > pipe.x &&
+          rocket.x < pipe.x + pipeWidth &&
+          (rocket.y < pipe.topHeight || rocket.y + rocket.height > pipe.bottomY)
         ) {
           resetGame();
         }
       });
-      
-      if (bird.y <= 0) {
+
+      if (rocket.y <= 0) {
         resetGame();
       }
 
@@ -139,15 +147,14 @@ const SpaceEarn: React.FC = () => {
     let frames = 0;
 
     document.addEventListener('keydown', () => {
-      bird.speedY = bird.jump;
+      rocket.speedY = rocket.jump;
     });
 
     function resetGame() {
-      if (!canvas)
-        return
+      if (!canvas) return;
 
-      bird.y = canvas.height / 2;
-      bird.speedY = 0;
+      rocket.y = canvas.height / 2;
+      rocket.speedY = 0;
       pipes.length = 0;
       score = 0;
       frames = 0;
@@ -157,7 +164,7 @@ const SpaceEarn: React.FC = () => {
 
     return () => {
       document.removeEventListener('keydown', () => {
-        bird.speedY = bird.jump;
+        rocket.speedY = rocket.jump;
       });
     };
   }, []);
@@ -166,7 +173,7 @@ const SpaceEarn: React.FC = () => {
     <div className="card w-96 p-0 bg-base-100 shadow-xl text-left">
       <canvas className="rounded-2xl" ref={canvasRef} />
     </div>
-  )
+  );
 };
 
 export default SpaceEarn;
