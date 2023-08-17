@@ -3,9 +3,6 @@ import { formatEther } from 'viem';
 import { default as AbiWeb3Button } from './abi/contracts/Web3Button.sol/Web3Button.json';
 import { createPublicClient, http } from 'viem'
 import { polygon } from 'viem/chains'
-import {
-  useContractRead
-} from 'wagmi'
 
 export function Winnings() {
   
