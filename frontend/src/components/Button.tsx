@@ -30,8 +30,8 @@ export function Button() {
 
   if (address) {
     return (
-      <div className="card w-96">
-        <button className="button" disabled={!write} onClick={() => pressButton()}>
+      <div className="card">
+        <button className="button text-4xl lg:text-5xl w-max" disabled={!write} onClick={() => pressButton()}>
           Press me! 
           <svg className="inline" viewBox="0 0 60 60" height="96px" width="96px">
             <path
@@ -48,7 +48,7 @@ export function Button() {
         <ConnectKitButton.Custom>
           {({ show }) => {
             return (
-              <button className="button" onClick={show} >
+              <button className="button text-4xl lg:text-5xl w-max" onClick={show} >
                 Connect wallet
               </button>
             );
