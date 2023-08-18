@@ -30,7 +30,7 @@ export function Button() {
 
   if (address) {
     return (
-      <div className="button-container card w-96">
+      <div className="card w-96">
         <button className="button" disabled={!write} onClick={() => pressButton()}>
           Press me! 
           <svg className="inline" viewBox="0 0 60 60" height="96px" width="96px">

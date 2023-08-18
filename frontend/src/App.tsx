@@ -3,7 +3,7 @@ import { ConnectKitProvider, ConnectKitButton, getDefaultConfig } from "connectk
 import { WagmiConfig, createConfig } from 'wagmi'
 import { polygon } from 'viem/chains'
 
-import { Winnings } from './Winnings'
+import { Stats } from './components/Stats'
 import { Button } from "./components/Button"
 import { FlipCounter } from "./components/FlipCounter"
 
@@ -39,17 +39,17 @@ function App() {
               Web3 Button
             </h1>
             <div className="max-w-3xl mx-auto lg:text-xl text-gray-200 mt-3 leading-normal font-light">
-              Each press of the button restarts the 60 second timer. If you're the last person who pressed it when the timer reaches 0, you'll win 1 Eth. Each button press costs 0.001 Eth, of which 90% of is added to the winning pot.
+              Each press of the button restarts the 60 second progress bar inside of it. If you're the last person who pressed it when the timer reaches 0, you'll win 1 Eth. Each button press costs 0.001 Eth, of which 90% of is added to the winning pot.
             </div>
             
           </div>
 
           <div className="flex space-x-4 justify-center items-center h-64">
             <Button />
-            <FlipCounter />
+            <FlipCounter initialCount={60} />
           </div>
           <div className="flex space-x-4 justify-center items-center h-64">
-            <Winnings />
+            <Stats />
           </div>
         </ConnectKitProvider>
       </WagmiConfig>

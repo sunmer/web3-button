@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import { formatEther } from 'viem';
-import { default as AbiWeb3Button } from './abi/contracts/Web3Button.sol/Web3Button.json';
+import { default as AbiWeb3Button } from '../abi/contracts/Web3Button.sol/Web3Button.json';
 import { createPublicClient, http } from 'viem'
 import { polygon } from 'viem/chains'
 
-export function Winnings() {
+export function Stats() {
   
   const [winnings, setWinnings] = useState<bigint | null>(null);
   const [lastPresser, setLastPresser] = useState<string | null>(null);
-  const [secondsSinceLastPress, setSecondsSinceLastPress] = useState<string | null>(null);
 
   const publicClient = createPublicClient({
     chain: polygon,
@@ -17,17 +16,13 @@ export function Winnings() {
   
   useEffect(() => {
     const intervalID = setInterval(async () => {
-      let lastPressTime = await publicClient.readContract({
-        address: '0x6ef081c8dea3afb466520975440a34fbea7d4133',
-        abi: AbiWeb3Button.abi,
-        functionName: 'lastPressTimestamp',
-      }) as bigint;
-
       const lastPresser = await publicClient.readContract({
         address: '0x6ef081c8dea3afb466520975440a34fbea7d4133',
         abi: AbiWeb3Button.abi,
         functionName: 'lastPresser',
       }) as string;
+
+      setLastPresser(lastPresser);
 
       const winnings = await publicClient.readContract({
         address: '0x6ef081c8dea3afb466520975440a34fbea7d4133',
@@ -35,9 +30,6 @@ export function Winnings() {
         functionName: 'balance',
       }) as bigint;
 
-      const lastPress = (new Date().getTime() / 1000) - Number(lastPressTime)
-      setSecondsSinceLastPress(Math.round(lastPress).toString())
-      setLastPresser(lastPresser);
       setWinnings(winnings);
     }, 1000);
   
@@ -55,14 +47,7 @@ export function Winnings() {
           )}
         </div>
         <div>
-          {winnings ? (
-            <p>Last press: {secondsSinceLastPress}s ago</p>
-          ) : (
-            <p>Loading last press...</p>
-          )}
-        </div>
-        <div>
-          {lastPresser ? (
+        {lastPresser ? (
             <p>Last presser: {lastPresser.slice(0, 6)}...{lastPresser.slice(-4)}</p>
           ) : (
             <p>Loading last presser...</p>
