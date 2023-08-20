@@ -12,7 +12,7 @@ export function Button() {
   const { address } = useAccount()
 
   const { config, error } = usePrepareContractWrite({
-    address: '0x6ef081c8dea3afb466520975440a34fbea7d4133',
+    address: '0xc41C0bB4a52a5b655dDa3b2EA8cC4AA1FdbA6630',
     abi: AbiWeb3Button.abi,
     functionName: 'press',
     value: parseEther('0.001'),

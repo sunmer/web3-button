@@ -17,7 +17,7 @@ export function Stats() {
   useEffect(() => {
     const intervalID = setInterval(async () => {
       const lastPresser = await publicClient.readContract({
-        address: '0x6ef081c8dea3afb466520975440a34fbea7d4133',
+        address: '0xc41C0bB4a52a5b655dDa3b2EA8cC4AA1FdbA6630',
         abi: AbiWeb3Button.abi,
         functionName: 'lastPresser',
       }) as string;
@@ -25,7 +25,7 @@ export function Stats() {
       setLastPresser(lastPresser);
 
       const winnings = await publicClient.readContract({
-        address: '0x6ef081c8dea3afb466520975440a34fbea7d4133',
+        address: '0xc41C0bB4a52a5b655dDa3b2EA8cC4AA1FdbA6630',
         abi: AbiWeb3Button.abi,
         functionName: 'balance',
       }) as bigint;

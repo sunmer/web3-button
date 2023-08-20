@@ -11,8 +11,6 @@ describe("Web3Button", function () {
   async function deployFixture() {
     const ONE_GWEI = 1_000_000_000;
 
-    const lockedAmount = ONE_GWEI;
-
     // Contracts are deployed using the first signer/account by default
     const [owner, otherAccount] = await ethers.getSigners();
 
@@ -30,14 +28,15 @@ describe("Web3Button", function () {
       const web3ButtonWithOtherAccount = web3Button.connect(otherAccount);
 
       // Press the button and send 0.0001 ETH
-      const pressTx = await web3ButtonWithOtherAccount.press({ value: ethers.parseEther("0.0001") });
+      const pressTx = await web3ButtonWithOtherAccount.press({ value: ethers.parseEther("0.001") });
 
       // Wait for the transaction to be mined
       await pressTx.wait();
 
       // Check the last presser and the contract balance
       expect(await web3Button.lastPresser()).to.equal(otherAccount.address);
-      expect(await web3Button.balance()).to.equal(ethers.parseEther("0.0001"));
+      const contractBalance = await ethers.provider.getBalance(web3Button.getAddress());
+      expect(contractBalance).to.equal(ethers.parseEther("0.001"));
     });
   });
 
