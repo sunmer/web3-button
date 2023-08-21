@@ -1,5 +1,6 @@
 import { default as AbiWeb3Button } from '../abi/contracts/Web3Button.sol/Web3Button.json';
 import { ConnectKitButton } from "connectkit";
+import { useEffect, useState } from 'react';
 import { parseEther } from 'viem';
 import {
   usePrepareContractWrite,
@@ -7,41 +8,106 @@ import {
   useAccount
 } from 'wagmi'
 
-export function Button() {
+export function Button({ lastPressTime, lastPresser }: { lastPressTime: bigint | null, lastPresser: string | null }) {
 
   const { address } = useAccount()
+  const [timer, setTimer] = useState<number>(0);
 
-  const { config, error } = usePrepareContractWrite({
+  const { config: configPress, error: errorPress } = usePrepareContractWrite({
     address: '0xc41C0bB4a52a5b655dDa3b2EA8cC4AA1FdbA6630',
     abi: AbiWeb3Button.abi,
     functionName: 'press',
     value: parseEther('0.001'),
   })
 
+  const { config: configClaim, error: errorClaim } = usePrepareContractWrite({
+    address: '0xc41C0bB4a52a5b655dDa3b2EA8cC4AA1FdbA6630',
+    abi: AbiWeb3Button.abi,
+    functionName: 'claimPot',
+  })
+
   const pressButton = () => {
-    if (!error) {
-      write?.()
+    if (!errorPress) {
+      writePress?.()
     } else {
-      console.log(error)
+      console.log(errorPress)
     }
   }
 
-  const { write } = useContractWrite(config)
+  const claimPot = () => {
+    if (!errorClaim) {
+      writeClaim?.()
+    } else {
+      console.log(errorClaim)
+    }
+  }
+
+  const { write: writePress } = useContractWrite(configPress);
+  const { write: writeClaim } = useContractWrite(configClaim);
+
+  const updateNumbers = async () => {
+    const elapsedTime = (new Date().getTime() / 1000) - Number(lastPressTime);
+    const elapsedSeconds = 60 - Math.round(elapsedTime);
+
+    if (elapsedSeconds > 0) {
+      setTimer(elapsedSeconds);
+    } else {
+      setTimer(0);
+    }
+  };
+
+  useEffect(() => {
+    const timerID = setInterval(updateNumbers, 1000);
+    return () => clearInterval(timerID);
+  }, [lastPressTime]);
 
   if (address) {
-    return (
-      <div className="card">
-        <button className="button text-4xl lg:text-5xl w-max" disabled={!write} onClick={() => pressButton()}>
-          Press me! 
-          <svg className="inline" viewBox="0 0 60 60" height="96px" width="96px">
-            <path
-              fill="currentColor"
-              d="M10.68 8.936h4v5.114a14 14 0 11-2.074 20.022l3.238-2.37a10 10 0 101.652-14.768h5.182v4h-12v-12z"
-            />
-          </svg>
-        </button>
-      </div>
-    )
+    if (!lastPresser || !lastPressTime) {
+      return (
+        <div className="card">
+          <button className="btn btn-lg" disabled={!writePress} onClick={() => pressButton()}>
+            Loading...
+          </button>
+        </div>
+      )
+    } else if (address !== lastPresser) {
+      return (
+        <div className="card">
+          <button className="btn btn-secondary btn-lg" disabled={!writePress} onClick={() => pressButton()}>
+            Reset timer
+            <div className="flex flex-col p-2 bg-white rounded-box text-black">
+              <span className="countdown font-mono">
+                <span style={{ "--value": timer }}></span>
+              </span>
+            </div>
+          </button>
+        </div>
+      )
+    } else if (address === lastPresser) {
+      const timestamp = new Date().getTime() / 1000;
+      if (timestamp - Number(lastPressTime) > 60) {
+        return (
+          <div className="card">
+            <button className="btn btn-success btn-lg text-white" onClick={() => claimPot()}>
+              Claim pot
+            </button>
+          </div>
+        )
+      } else {
+        return (
+          <div className="card">
+            <button className="btn btn-secondary btn-lg" onClick={() => claimPot()}>
+              In the lead
+              <div className="flex flex-col p-2 bg-white rounded-box text-black">
+                <span className="countdown font-mono">
+                  <span style={{ "--value": timer }}></span>
+                </span>
+              </div>
+            </button>
+          </div>
+        )
+      }
+    }
   } else {
     return (
       <div className="card w-96">

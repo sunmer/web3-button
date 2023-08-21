@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { formatEther } from 'viem';
 import { default as AbiWeb3Button } from '../abi/contracts/Web3Button.sol/Web3Button.json';
 import { PublicClient } from 'viem'
+import { useAccount } from 'wagmi';
 
-export function Intro({ publicClient }: { publicClient: PublicClient }) {
+export function Intro({ publicClient, lastPresser }: { publicClient: PublicClient, lastPresser: string | null }) {
 
+  const { address } = useAccount()
   const [winnings, setWinnings] = useState<bigint | null>(null);
   
   useEffect(() => {
@@ -13,7 +15,7 @@ export function Intro({ publicClient }: { publicClient: PublicClient }) {
       const winnings = await publicClient.readContract({
         address: '0xc41C0bB4a52a5b655dDa3b2EA8cC4AA1FdbA6630',
         abi: AbiWeb3Button.abi,
-        functionName: 'balance',
+        functionName: 'potBalance',
       }) as bigint;
 
       setWinnings(winnings);
@@ -24,8 +26,7 @@ export function Intro({ publicClient }: { publicClient: PublicClient }) {
   
   return (
     <div className="max-w-3xl mx-auto lg:text-xl text-gray-200 mt-3 leading-normal font-light">
-      Each press of the button restarts the 60 second timer. If you're the last person who pressed it when the timer reaches 0, you'll win 
-      <span className="font-bold"> {winnings ? formatEther(winnings, 'wei') : '?'} Eth</span>. Each button press costs 0.001 Eth - of which 90% goes to the winning pot and 10% to the dev.
+      The 60-second timer resets each time the button is pressed. If the counter ever reaches 0, the last person who pressed the button wins the pot of <span className="font-bold"> {winnings ? formatEther(winnings, 'wei') : '?'}</span> Eth. Each button press costs 0.001 Eth which goes to the winning pot. The current last presser is {lastPresser ? `${lastPresser.slice(0, 6)}...${lastPresser.slice(-4)}` : `loading`}
     </div>
     
   );
