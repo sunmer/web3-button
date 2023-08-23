@@ -23,10 +23,22 @@ export function Intro({ publicClient, lastPresser }: { publicClient: PublicClien
   
     return () => clearInterval(intervalID);
   }, []);
+
+  function getLastPresser() {
+    if(lastPresser) {
+      if(address && address === lastPresser) {
+        return 'you!'
+      } else {
+        return `${lastPresser.slice(0, 6)}...${lastPresser.slice(-4)}`;
+      }
+    } else {
+      return 'loading..';
+    }
+  }
   
   return (
     <div className="max-w-3xl mx-auto lg:text-xl text-gray-200 mt-3 leading-normal font-light">
-      The 60-second timer resets each time the button is pressed. If the counter ever reaches 0, the last person who pressed the button wins the pot of <span className="font-bold"> {winnings ? formatEther(winnings, 'wei') : '?'}</span> Eth. Each button press costs 0.001 Eth which goes to the winning pot. The current last presser is {lastPresser ? `${lastPresser.slice(0, 6)}...${lastPresser.slice(-4)}` : `loading`}
+      The 60-second timer resets each time the button is pressed. If the counter ever reaches 0, the last person who pressed the button wins the pot of <span className="font-bold"> {winnings ? formatEther(winnings, 'wei') : '?'}</span> Eth. Each button press costs 0.001 Eth which goes to the winning pot. The current last presser is {getLastPresser()}
     </div>
     
   );

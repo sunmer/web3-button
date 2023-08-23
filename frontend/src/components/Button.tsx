@@ -65,7 +65,7 @@ export function Button({ lastPressTime, lastPresser }: { lastPressTime: bigint |
     if (!lastPresser || !lastPressTime) {
       return (
         <div className="card">
-          <button className="btn btn-lg" disabled={!writePress} onClick={() => pressButton()}>
+          <button className="btn btn-lg">
             Loading...
           </button>
         </div>
@@ -85,7 +85,20 @@ export function Button({ lastPressTime, lastPresser }: { lastPressTime: bigint |
       )
     } else if (address === lastPresser) {
       const timestamp = new Date().getTime() / 1000;
-      if (timestamp - Number(lastPressTime) > 60) {
+      if (timestamp - Number(lastPressTime) > 300) {
+        return (
+          <div className="card">
+            <div className="card-body items-center text-center">
+              <div className="card-actions">
+                <button className="btn btn-secondary btn-lg text-white" disabled={!writePress} onClick={() => pressButton()}>
+                  Reset timer
+                </button>
+              </div>
+              <p>Your pot has expired, it is only claimable for a 5 minute duration after you've won</p>
+            </div>
+          </div>
+        )
+      } else if (timestamp - Number(lastPressTime) > 60) {
         return (
           <div className="card">
             <button className="btn btn-success btn-lg text-white" onClick={() => claimPot()}>
@@ -114,7 +127,7 @@ export function Button({ lastPressTime, lastPresser }: { lastPressTime: bigint |
         <ConnectKitButton.Custom>
           {({ show }) => {
             return (
-              <button className="button text-4xl lg:text-5xl w-max" onClick={show} >
+              <button className="btn btn-secondary btn-lg" onClick={show}>
                 Connect wallet
               </button>
             );

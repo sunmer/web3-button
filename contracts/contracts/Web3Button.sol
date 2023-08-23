@@ -13,17 +13,17 @@ contract Web3Button {
     event GameWon(address indexed winner);
 
     constructor() {
-        owner = msg.sender;
+      owner = msg.sender;
     }
 
     modifier onlyLastPresser() {
-        require(msg.sender == lastPresser, "Only the last presser can call this function");
-        _;
-    }
+    require(msg.sender == lastPresser, "Only the last presser can call this function");
+    _;
+  }
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "Only the owner can call this function");
-        _;
+      require(msg.sender == owner, "Only the owner can call this function");
+      _;
     }
 
     function press() external payable {
@@ -31,7 +31,7 @@ contract Web3Button {
 
       // Check if the previous game was unclaimed and if it's past the claimDeadline
       if(!isGameActive && block.timestamp > claimDeadline) {
-          isGameActive = true;
+        isGameActive = true;
       }
 
       require(isGameActive, "Game has ended. Wait for the restart.");
@@ -48,27 +48,30 @@ contract Web3Button {
     }
 
     function claimPot() external onlyLastPresser {
-        require(block.timestamp - lastPressTimestamp >= 60 seconds, "Wait for the timer to expire.");
-        require(block.timestamp <= claimDeadline, "Claim period has expired.");
-        require(potBalance > 0, "Pot balance is empty");
+      require(block.timestamp - lastPressTimestamp >= 60 seconds, "Wait for the timer to expire.");
+      require(block.timestamp <= claimDeadline, "Claim period has expired.");
+      require(potBalance > 0, "Pot balance is empty");
 
-        uint256 amountToSend = potBalance;
-        potBalance = 0;
-        isGameActive = false;
+      uint256 amountToSend = potBalance;
+      potBalance = 0;
+      isGameActive = false;
+      lastPresser = address(0);
+      lastPressTimestamp = 0;
+      claimDeadline = 0;
 
-        (bool success, ) = lastPresser.call{ value: amountToSend }("");
-        require(success, "Transfer failed");
+      (bool success, ) = msg.sender.call{ value: amountToSend }("");
+      require(success, "Transfer failed");
 
-        emit GameWon(lastPresser);
+      emit GameWon(msg.sender);
     }
 
     receive() external payable {
-        revert("Contract does not accept direct Ether transfers");
+      revert("Contract does not accept direct Ether transfers");
     }
 
     function withdraw() external onlyOwner {
       uint256 protocolBalance = address(this).balance - potBalance;
       payable(owner).transfer(protocolBalance);
-  }
+    }
 
 }
