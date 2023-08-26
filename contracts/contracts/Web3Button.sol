@@ -17,9 +17,9 @@ contract Web3Button {
     }
 
     modifier onlyLastPresser() {
-    require(msg.sender == lastPresser, "Only the last presser can call this function");
-    _;
-  }
+      require(msg.sender == lastPresser, "Only the last presser can call this function");
+      _;
+    }
 
     modifier onlyOwner() {
       require(msg.sender == owner, "Only the owner can call this function");
@@ -33,6 +33,11 @@ contract Web3Button {
       if(!isGameActive && block.timestamp > claimDeadline) {
         isGameActive = true;
       }
+      
+      // Check if someone is eligible to claim the pot
+      if(block.timestamp - lastPressTimestamp >= 60 seconds && block.timestamp <= claimDeadline) {
+        revert("Game has ended. Wait for the restart.");
+      }
 
       require(isGameActive, "Game has ended. Wait for the restart.");
 
@@ -45,7 +50,8 @@ contract Web3Button {
       claimDeadline = block.timestamp + 300 seconds;
 
       emit ButtonPressed(lastPresser);
-    }
+  }
+
 
     function claimPot() external onlyLastPresser {
       require(block.timestamp - lastPressTimestamp >= 60 seconds, "Wait for the timer to expire.");
