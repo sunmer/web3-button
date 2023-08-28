@@ -8,20 +8,20 @@ import {
   useAccount
 } from 'wagmi'
 
-export function Button({ lastPressTime, lastPresser }) {
+export function Button({ lastPressTime, lastPresser }: { lastPressTime: bigint | null, lastPresser: string | null }) {
 
   const { address } = useAccount();
   const [timer, setTimer] = useState<number>(0);
 
   const { config: configPress, error: errorPress } = usePrepareContractWrite({
-    address: '0xfb13C6b0E683C9f963C21Cf503c82b6DA5aa6070',
+    address: '0xf3ac4557b55dEc19245778526b2C8C3139EF812c',
     abi: AbiWeb3Button.abi,
     functionName: 'press',
     value: parseEther('0.001'),
   });
 
   const { config: configClaim, error: errorClaim } = usePrepareContractWrite({
-    address: '0xfb13C6b0E683C9f963C21Cf503c82b6DA5aa6070',
+    address: '0xf3ac4557b55dEc19245778526b2C8C3139EF812c',
     abi: AbiWeb3Button.abi,
     functionName: 'claimPot',
   });
@@ -34,6 +34,7 @@ export function Button({ lastPressTime, lastPresser }) {
       console.log(errorPress);
       return;
     }
+
     writePress?.();
   }
 
@@ -42,6 +43,7 @@ export function Button({ lastPressTime, lastPresser }) {
       console.log(errorClaim);
       return;
     }
+    
     writeClaim?.();
   }
 
@@ -99,8 +101,9 @@ export function Button({ lastPressTime, lastPresser }) {
       return (
         <div className="card">
           <button className="btn btn-secondary btn-lg" disabled>
-            Game has ended. Wait for the restart.
+            Game has ended
           </button>
+          <span className="mt-2">Waiting 5 mins for the pot to be claimed</span>
         </div>
       );
     }
@@ -142,16 +145,19 @@ export function Button({ lastPressTime, lastPresser }) {
     );
   }
 
-  return (
-    <div className="card">
-      <button className="btn btn-secondary btn-lg">
-        You're winning!
-        <div className="flex flex-col p-2 bg-white rounded-box text-black">
-          <span className="countdown font-mono">
-            <span style={{ "--value": timer }}></span>
-          </span>
-        </div>
-      </button>
-    </div>
-  );
+  if (address === lastPresser) {
+    return (
+      <div className="card">
+        <button className="btn btn-secondary btn-lg">
+          You're winning!
+          <div className="flex flex-col p-2 bg-white rounded-box text-black">
+            <span className="countdown font-mono">
+              <span style={{ "--value": timer }}></span>
+            </span>
+          </div>
+        </button>
+      </div>
+    );
+  }
+  
 }

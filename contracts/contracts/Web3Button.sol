@@ -2,82 +2,81 @@
 pragma solidity ^0.8.0;
 
 contract Web3Button {
-    address public owner;
-    address public lastPresser;
-    uint256 public lastPressTimestamp;
-    uint256 public potBalance;
-    uint256 public claimDeadline;
-    bool public isGameActive = true;
+  address public owner;
+  bool public isGameActive = true;
+  uint256 public constant CLAIM_DURATION = 300 seconds;
 
-    event ButtonPressed(address indexed lastPresser);
-    event GameWon(address indexed winner);
-
-    constructor() {
-      owner = msg.sender;
-    }
-
-    modifier onlyLastPresser() {
-      require(msg.sender == lastPresser, "Only the last presser can call this function");
-      _;
-    }
-
-    modifier onlyOwner() {
-      require(msg.sender == owner, "Only the owner can call this function");
-      _;
-    }
-
-    function press() external payable {
-      require(msg.value >= 0.001 ether, "You need to send at least 0.001 Eth");
-
-      // Check if the previous game was unclaimed and if it's past the claimDeadline
-      if(!isGameActive && block.timestamp > claimDeadline) {
-        isGameActive = true;
-      }
-      
-      // Check if someone is eligible to claim the pot
-      if(block.timestamp - lastPressTimestamp >= 60 seconds && block.timestamp <= claimDeadline) {
-        revert("Game has ended. Wait for the restart.");
-      }
-
-      require(isGameActive, "Game has ended. Wait for the restart.");
-
-      potBalance += (msg.value * 9) / 10;
-
-      lastPresser = msg.sender;
-      lastPressTimestamp = block.timestamp;
-
-      // Set the claim deadline whenever the button is pressed
-      claimDeadline = block.timestamp + 300 seconds;
-
-      emit ButtonPressed(lastPresser);
+  struct GameStatus {
+    address lastPresser;
+    uint256 lastPressTimestamp;
+    uint256 potBalance;
   }
 
+  GameStatus public gameStatus;
 
-    function claimPot() external onlyLastPresser {
-      require(block.timestamp - lastPressTimestamp >= 60 seconds, "Wait for the timer to expire.");
-      require(block.timestamp <= claimDeadline, "Claim period has expired.");
-      require(potBalance > 0, "Pot balance is empty");
+  event ButtonPressed(GameStatus gameStatus);
+  event GameWon(address indexed winner);
 
-      uint256 amountToSend = potBalance;
-      potBalance = 0;
-      isGameActive = false;
-      lastPresser = address(0);
-      lastPressTimestamp = 0;
-      claimDeadline = 0;
+  constructor() {
+    owner = msg.sender;
+  }
 
-      (bool success, ) = msg.sender.call{ value: amountToSend }("");
-      require(success, "Transfer failed");
+  modifier onlyLastPresser() {
+    require(msg.sender == gameStatus.lastPresser, "Only the last presser can call this function");
+    _;
+  }
 
-      emit GameWon(msg.sender);
+  modifier onlyOwner() {
+    require(msg.sender == owner, "Only the owner can call this function");
+    _;
+  }
+
+  function press() external payable {
+    require(msg.value >= 0.001 ether, "You need to send at least 0.001 Eth");
+
+    // Check if the previous game was unclaimed and if it's past the claimDeadline
+    if(!isGameActive && block.timestamp > gameStatus.lastPressTimestamp + CLAIM_DURATION) {
+        isGameActive = true;
+    }
+    
+    // Check if someone is eligible to claim the pot
+    if(block.timestamp - gameStatus.lastPressTimestamp >= 60 seconds && block.timestamp <= gameStatus.lastPressTimestamp + 300 seconds) {
+        revert("Game has ended. Wait for the restart.");
     }
 
-    receive() external payable {
-      revert("Contract does not accept direct Ether transfers");
-    }
+    require(isGameActive, "Game has ended. Wait for the restart.");
 
-    function withdraw() external onlyOwner {
-      uint256 protocolBalance = address(this).balance - potBalance;
-      payable(owner).transfer(protocolBalance);
-    }
+    gameStatus.potBalance += (msg.value * 9) / 10;
+    gameStatus.lastPresser = msg.sender;
+    gameStatus.lastPressTimestamp = block.timestamp;
+
+    emit ButtonPressed(gameStatus);
+  }
+
+  function claimPot() external onlyLastPresser {
+    require(block.timestamp - gameStatus.lastPressTimestamp >= 60 seconds, "Wait for the timer to expire.");
+    require(block.timestamp <= gameStatus.lastPressTimestamp + CLAIM_DURATION, "Claim period has expired.");
+    require(gameStatus.potBalance > 0, "Pot balance is empty");
+
+    uint256 amountToSend = gameStatus.potBalance;
+    gameStatus.potBalance = 0;
+    isGameActive = false;
+    gameStatus.lastPresser = address(0);
+    gameStatus.lastPressTimestamp = 0;
+
+    (bool success, ) = msg.sender.call{ value: amountToSend }("");
+    require(success, "Transfer failed");
+
+    emit GameWon(msg.sender);
+  }
+
+  receive() external payable {
+    revert("Contract does not accept direct Ether transfers");
+  }
+
+  function withdraw() external onlyOwner {
+    uint256 protocolBalance = address(this).balance - gameStatus.potBalance;
+    payable(owner).transfer(protocolBalance);
+  }
 
 }

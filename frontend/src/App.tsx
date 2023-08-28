@@ -1,6 +1,5 @@
 import { ConnectKitProvider, ConnectKitButton, getDefaultConfig } from "connectkit";
-
-import { WagmiConfig, createConfig, useAccount } from 'wagmi'
+import { WagmiConfig, createConfig } from 'wagmi'
 import { polygon } from 'viem/chains'
 import { default as AbiWeb3Button } from './abi/contracts/Web3Button.sol/Web3Button.json';
 import { formatEther } from 'viem';
@@ -8,6 +7,12 @@ import { Button } from "./components/Button"
 
 import './App.css'
 import { useState, useEffect } from "react";
+
+type GameStatus = [
+  string,
+  bigint,
+  bigint
+]
 
 function App() {
 
@@ -27,41 +32,20 @@ function App() {
     }
   }
 
-  const [lastPressTime, setLastPressTime] = useState<bigint | null>(null);
   const [lastPresser, setLastPresser] = useState<string | null>(null);
-  const [winnings, setWinnings] = useState<bigint | null>(null);
-
-  useEffect(() => {
-    const intervalID = setInterval(async () => {
-
-      const winnings = await config.getPublicClient().readContract({
-        address: '0xfb13C6b0E683C9f963C21Cf503c82b6DA5aa6070',
-        abi: AbiWeb3Button.abi,
-        functionName: 'potBalance',
-      }) as bigint;
-
-      setWinnings(winnings);
-    }, 1000);
-
-    return () => clearInterval(intervalID);
-  }, []);
+  const [lastPressTimestamp, setLastPressTimestamp] = useState<bigint | null>(null);
+  const [potBalance, setPotBalance] = useState<bigint | null>(null);
 
   const fetchStats = async () => {
-    let fetchedTime = await config.getPublicClient().readContract({
-      address: '0xfb13C6b0E683C9f963C21Cf503c82b6DA5aa6070',
+    let gameStatus  = await config.getPublicClient().readContract({
+      address: '0xf3ac4557b55dEc19245778526b2C8C3139EF812c',
       abi: AbiWeb3Button.abi,
-      functionName: 'lastPressTimestamp',
-    }) as bigint;
+      functionName: 'gameStatus',
+    }) as GameStatus;
 
-    setLastPressTime(fetchedTime);
-
-    const lastPresser = await config.getPublicClient().readContract({
-      address: '0xfb13C6b0E683C9f963C21Cf503c82b6DA5aa6070',
-      abi: AbiWeb3Button.abi,
-      functionName: 'lastPresser',
-    }) as string;
-
-    setLastPresser(lastPresser);
+    setLastPresser(gameStatus[0]);
+    setLastPressTimestamp(gameStatus[1]);
+    setPotBalance(gameStatus[2]);
   };
 
   useEffect(() => {
@@ -88,14 +72,14 @@ function App() {
             </h1>
           </div>
           <div className="flex space-x-4 justify-center items-center h-32">
-            <Button lastPressTime={lastPressTime} lastPresser={lastPresser} />
+            <Button lastPressTime={lastPressTimestamp} lastPresser={lastPresser} />
           </div>
           <div className="max-w-xl mx-auto lg:text-xl text-gray-200 mt-3 leading-normal font-light">
             Anyone can reset the 60-second timer and add 0.001 Eth to the pot. If the timer reaches 0 on your click, you win the pot!
             <br /> <br />
             Current pot&nbsp;
             <div className="badge badge-accent text-lg px-2	p-3">
-              {winnings ? formatEther(winnings, 'wei') : '0'} Eth
+              {potBalance ? formatEther(potBalance, 'wei') : '0'} Eth
             </div> Last presser&nbsp;
             <div className="badge badge-accent text-lg px-2	p-3">
               {getLastPresser()}
