@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+// SPDX-License-Identifier: MIT 
+pragma solidity ^0.8.19;
 
 contract Web3Button {
   address public owner;
@@ -34,15 +34,15 @@ contract Web3Button {
   function press() external payable {
     require(msg.value >= 0.001 ether, "You need to send at least 0.001 Eth");
 
+    if(isGameActive && msg.sender == gameStatus.lastPresser) {
+      revert("You're already the last presser");
+    }
+
     // Check if the previous game was unclaimed and if it's past the claimDeadline
     if(!isGameActive && block.timestamp > gameStatus.lastPressTimestamp + CLAIM_DURATION) {
         isGameActive = true;
     }
 
-    if(isGameActive && msg.sender == gameStatus.lastPresser) {
-      revert("You're already the last presser");
-    }
-    
     // Check if someone is eligible to claim the pot
     if(block.timestamp - gameStatus.lastPressTimestamp >= 60 seconds && block.timestamp <= gameStatus.lastPressTimestamp + 300 seconds) {
         revert("Game has ended. Wait for the restart.");
