@@ -26,7 +26,7 @@ export function Button({ lastPressTime, lastPresser }: { lastPressTime: bigint |
     functionName: 'claimPot',
   });
 
-  const { write: writePress, isLoading, isSuccess } = useContractWrite(configPress);
+  const { write: writePress, isLoading } = useContractWrite(configPress);
   const { write: writeClaim } = useContractWrite(configClaim);
 
   const pressButton = () => {
