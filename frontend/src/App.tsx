@@ -41,7 +41,7 @@ function App() {
 
   const fetchStats = async () => {
     let gameStatus = await config.getPublicClient().readContract({
-      address: '0x7928dE0791424936EC018e559F407B09c91265C5',
+      address: '0x31C0a66A69D8a63A1b87d595AE3a8Db461218f93',
       abi: AbiWeb3Button.abi,
       functionName: 'gameStatus',
     }) as GameStatus;

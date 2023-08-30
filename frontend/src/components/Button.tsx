@@ -14,14 +14,14 @@ export function Button({ lastPressTime, lastPresser }: { lastPressTime: bigint |
   const [timer, setTimer] = useState<number>(0);
 
   const { config: configPress, error: errorPress } = usePrepareContractWrite({
-    address: '0x7928dE0791424936EC018e559F407B09c91265C5',
+    address: '0x31C0a66A69D8a63A1b87d595AE3a8Db461218f93',
     abi: AbiWeb3Button.abi,
     functionName: 'press',
     value: parseEther('0.001'),
   });
 
   const { config: configClaim, error: errorClaim } = usePrepareContractWrite({
-    address: '0x7928dE0791424936EC018e559F407B09c91265C5',
+    address: '0x31C0a66A69D8a63A1b87d595AE3a8Db461218f93',
     abi: AbiWeb3Button.abi,
     functionName: 'claimPot',
   });
