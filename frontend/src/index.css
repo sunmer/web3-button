@@ -14,3 +14,11 @@
   height: 300px;
   z-index: -1;
 }
+
+.blink-border {
+  border: 3px #fff solid;
+  animation: blink .2s;
+  animation-iteration-count: 5;
+}
+
+@keyframes blink { 50% { border-color: transparent ; }  }

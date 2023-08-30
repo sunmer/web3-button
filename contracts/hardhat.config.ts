@@ -7,10 +7,10 @@ const { RPC_URL, PRIVATE_KEY } = process.env;
 
 const config: HardhatUserConfig = {
   solidity: "0.8.19",
-   defaultNetwork: "matic",
+   defaultNetwork: "base",
    networks: {
       hardhat: {},
-      matic: {
+      base: {
         url: RPC_URL,
         accounts: [PRIVATE_KEY!]
       }

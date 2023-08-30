@@ -14,19 +14,19 @@ export function Button({ lastPressTime, lastPresser }: { lastPressTime: bigint |
   const [timer, setTimer] = useState<number>(0);
 
   const { config: configPress, error: errorPress } = usePrepareContractWrite({
-    address: '0xf3ac4557b55dEc19245778526b2C8C3139EF812c',
+    address: '0x7928dE0791424936EC018e559F407B09c91265C5',
     abi: AbiWeb3Button.abi,
     functionName: 'press',
     value: parseEther('0.001'),
   });
 
   const { config: configClaim, error: errorClaim } = usePrepareContractWrite({
-    address: '0xf3ac4557b55dEc19245778526b2C8C3139EF812c',
+    address: '0x7928dE0791424936EC018e559F407B09c91265C5',
     abi: AbiWeb3Button.abi,
     functionName: 'claimPot',
   });
 
-  const { write: writePress } = useContractWrite(configPress);
+  const { write: writePress, isLoading, isSuccess } = useContractWrite(configPress);
   const { write: writeClaim } = useContractWrite(configClaim);
 
   const pressButton = () => {
@@ -55,7 +55,7 @@ export function Button({ lastPressTime, lastPresser }: { lastPressTime: bigint |
   };
 
   useEffect(() => {
-    const timerID = setInterval(updateNumbers, 1000);
+    const timerID = setInterval(updateNumbers, 250);
     return () => clearInterval(timerID);
   }, [lastPressTime]);
 
@@ -76,11 +76,11 @@ export function Button({ lastPressTime, lastPresser }: { lastPressTime: bigint |
   const timestamp = new Date().getTime() / 1000;
   const elapsedTime = timestamp - Number(lastPressTime);
 
-  if (lastPresser === null || lastPressTime === null) {
+  if (isLoading || lastPresser === null || lastPressTime === null) {
     return (
       <div className="card">
         <button className="btn btn-secondary btn-lg">
-          Loading
+          <span className="loading loading-spinner"></span>
         </button>
       </div>
     );
@@ -114,7 +114,7 @@ export function Button({ lastPressTime, lastPresser }: { lastPressTime: bigint |
           Reset timer
           <div className="flex flex-col p-2 bg-white rounded-box text-black">
             <span className="countdown font-mono">
-              <span style={{ "--value": timer }}></span>
+              <span style={{ "--value": timer }  as React.CSSProperties}></span>
             </span>
           </div>
         </button>
@@ -152,7 +152,7 @@ export function Button({ lastPressTime, lastPresser }: { lastPressTime: bigint |
           You're winning!
           <div className="flex flex-col p-2 bg-white rounded-box text-black">
             <span className="countdown font-mono">
-              <span style={{ "--value": timer }}></span>
+              <span style={{ "--value": timer }  as React.CSSProperties}></span>
             </span>
           </div>
         </button>
