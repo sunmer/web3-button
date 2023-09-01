@@ -132,7 +132,7 @@ function App() {
             {currentChain && currentChain.blockExplorers &&
               <>
                 <div className="badge badge-accent text-lg px-2	p-3">
-                  {potBalance ? formatEther(potBalance, 'wei') : '0'} {currentChain.id === polygon.id ? "Matic" : "Eth"}
+                  {potBalance ? formatEther(potBalance, currentChain.id === polygon.id ? "wei" : "gwei") : '0'} {currentChain.id === polygon.id ? "Matic" : "Eth"}
                 </div> Last presser&nbsp;
                 <div id="lastPresser" ref={lastPresserRef} className="badge badge-accent text-lg px-2 p-3">
                   <a href={lastPresser ? `${currentChain.blockExplorers.default.url}/address/${lastPresser}` : '#'} target="_blank">{getLastPresser()}</a>
