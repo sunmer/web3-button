@@ -2,7 +2,7 @@ import { ConnectKitProvider, ConnectKitButton, getDefaultConfig } from "connectk
 import { WagmiConfig, createConfig } from 'wagmi'
 import { base } from 'viem/chains'
 import { default as AbiWeb3Button } from './abi/contracts/Web3Button.sol/Web3Button.json';
-import { formatEther, isAddress } from 'viem';
+import { formatEther } from 'viem';
 import { Button } from "./components/Button"
 
 import './App.css'
@@ -40,25 +40,24 @@ function App() {
   const [potBalance, setPotBalance] = useState<bigint | null>(null);
 
   const fetchStats = async () => {
-    let gameStatus = await config.getPublicClient().readContract({
-      address: '0x3EA29C7b4fE02FD8FD16e403A247969312b5F79B',
-      abi: AbiWeb3Button.abi,
-      functionName: 'gameStatus',
-    }) as GameStatus;
-
-    setLastPresser(gameStatus[0]);
-    setLastPressTimestamp(gameStatus[1]);
-    setPotBalance(gameStatus[2]);
+    if (!document.hidden) {
+      let gameStatus = await config.getPublicClient().readContract({
+        address: '0x883C084CB430e2E0bE4dBA68B7756ace462E6978',
+        abi: AbiWeb3Button.abi,
+        functionName: 'gameStatus',
+      }) as GameStatus;
+  
+      setLastPresser(gameStatus[0]);
+      setLastPressTimestamp(gameStatus[1]);
+      setPotBalance(gameStatus[2]);
+    }
   };
 
   useEffect(() => {
     const blinkElement = () => {
-      if (lastPresserRef.current &&
+      if (lastPresser &&
+          lastPresserRef.current &&
           prevLastPresserRef.current &&
-          lastPresser &&
-          isAddress(prevLastPresserRef.current) &&
-          isAddress(lastPresser) && 
-          lastPresser !== "0x0000000000000000000000000000000000000000" &&
           lastPresser !== prevLastPresserRef.current) {
 
         lastPresserRef.current.classList.add("blink-border");

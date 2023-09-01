@@ -15,7 +15,7 @@ export function Button({ lastPressTime, lastPresser }: { lastPressTime: bigint |
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   
   let { config: configClaim, error: errorClaim, refetch: refetchClaimPot } = usePrepareContractWrite({
-    address: '0x3EA29C7b4fE02FD8FD16e403A247969312b5F79B',
+    address: '0x883C084CB430e2E0bE4dBA68B7756ace462E6978',
     abi: AbiWeb3Button.abi,
     functionName: 'claimPot',
   });
@@ -23,7 +23,7 @@ export function Button({ lastPressTime, lastPresser }: { lastPressTime: bigint |
   let { write: writeClaim, isLoading: isLoadingClaimPot } = useContractWrite(configClaim);
 
   let { config: configPress, error: errorPress, refetch: refetchPressButton } = usePrepareContractWrite({
-    address: '0x3EA29C7b4fE02FD8FD16e403A247969312b5F79B',
+    address: '0x883C084CB430e2E0bE4dBA68B7756ace462E6978',
     abi: AbiWeb3Button.abi,
     functionName: 'press',
     value: parseEther('0.001'),
@@ -37,7 +37,7 @@ export function Button({ lastPressTime, lastPresser }: { lastPressTime: bigint |
   };
 
   useEffect(() => {
-    if(address !== undefined) {
+    if (!document.hidden && address !== undefined) {
       if(lastPresser !== null && lastPresser !== address) {
         prepareContractWrites();
       } else {
