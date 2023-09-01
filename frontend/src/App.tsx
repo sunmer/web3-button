@@ -1,6 +1,6 @@
 import { ConnectKitProvider, ConnectKitButton, getDefaultConfig } from "connectkit";
 import { WagmiConfig, createConfig } from 'wagmi'
-import { polygon } from 'viem/chains'
+import { base } from 'viem/chains'
 import { default as AbiWeb3Button } from './abi/contracts/Web3Button.sol/Web3Button.json';
 import { formatEther, isAddress } from 'viem';
 import { Button } from "./components/Button"
@@ -20,7 +20,7 @@ function App() {
     getDefaultConfig({
       walletConnectProjectId: "0a0b6f07a3a8536c4a4de2149c7c7369",
       appName: "Web3Button",
-      chains: [polygon]
+      chains: [base]
     }),
   );
 
