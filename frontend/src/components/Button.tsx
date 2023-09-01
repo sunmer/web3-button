@@ -1,21 +1,24 @@
 import { default as AbiWeb3Button } from '../abi/contracts/Web3Button.sol/Web3Button.json';
 import { ConnectKitButton } from "connectkit";
 import { useEffect, useState, useCallback } from 'react';
-import { parseEther } from 'viem';
+import { Chain, parseEther } from 'viem';
+import { polygon } from 'viem/chains'
+import { CONTRACT_ADDRESS } from "../App"
 import {
   usePrepareContractWrite,
   useContractWrite,
   useAccount
 } from 'wagmi'
 
-export function Button({ lastPressTime, lastPresser }: { lastPressTime: bigint | null, lastPresser: string | null }) {
+export function Button({ currentChain, lastPressTime, lastPresser }: { currentChain: Chain, lastPressTime: bigint | null, lastPresser: string | null }) {
 
   const { address } = useAccount();
+
   const [timer, setTimer] = useState<number>(0);
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   
   let { config: configClaim, error: errorClaim, refetch: refetchClaimPot } = usePrepareContractWrite({
-    address: '0x883C084CB430e2E0bE4dBA68B7756ace462E6978',
+    address: CONTRACT_ADDRESS[currentChain.id] as `0x${string}`,
     abi: AbiWeb3Button.abi,
     functionName: 'claimPot',
   });
@@ -23,10 +26,10 @@ export function Button({ lastPressTime, lastPresser }: { lastPressTime: bigint |
   let { write: writeClaim, isLoading: isLoadingClaimPot } = useContractWrite(configClaim);
 
   let { config: configPress, error: errorPress, refetch: refetchPressButton } = usePrepareContractWrite({
-    address: '0x883C084CB430e2E0bE4dBA68B7756ace462E6978',
+    address: CONTRACT_ADDRESS[currentChain.id] as `0x${string}`,
     abi: AbiWeb3Button.abi,
     functionName: 'press',
-    value: parseEther('0.001'),
+    value: currentChain.id === polygon.id ? parseEther('1') : parseEther('0.001'),
   });
 
   const { write: writePress, isLoading: isLoadingPress } = useContractWrite(configPress);
@@ -47,7 +50,7 @@ export function Button({ lastPressTime, lastPresser }: { lastPressTime: bigint |
         return () => clearInterval(timerID);
       }
     }
-  }, [lastPresser, lastPressTime]);
+  }, [lastPresser, lastPressTime, currentChain]);
   
   const pressButton = () => {
     if (errorPress) {

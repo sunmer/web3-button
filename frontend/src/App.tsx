@@ -1,6 +1,6 @@
 import { ConnectKitProvider, ConnectKitButton, getDefaultConfig } from "connectkit";
 import { WagmiConfig, createConfig } from 'wagmi'
-import { base } from 'viem/chains'
+import { Chain, base, polygon } from 'viem/chains'
 import { default as AbiWeb3Button } from './abi/contracts/Web3Button.sol/Web3Button.json';
 import { formatEther } from 'viem';
 import { Button } from "./components/Button"
@@ -14,13 +14,18 @@ type GameStatus = [
   bigint
 ]
 
+export const CONTRACT_ADDRESS: { [key: number]: string } = {
+  [polygon.id]: "0xAaf8d7412120173BbcF7F919065F710f3Ac32E78",
+  [base.id]: "0x3EA29C7b4fE02FD8FD16e403A247969312b5F79B"
+};
+
 function App() {
 
   const config = createConfig(
     getDefaultConfig({
       walletConnectProjectId: "0a0b6f07a3a8536c4a4de2149c7c7369",
       appName: "Web3Button",
-      chains: [base]
+      chains: [polygon, base]
     }),
   );
 
@@ -38,27 +43,48 @@ function App() {
   const [lastPresser, setLastPresser] = useState<string | null>(null);
   const [lastPressTimestamp, setLastPressTimestamp] = useState<bigint | null>(null);
   const [potBalance, setPotBalance] = useState<bigint | null>(null);
+  const [currentChain, setCurrentChain] = useState<Chain>(polygon);
+  const [contractAddress, setCurrentContractAddress] = useState(CONTRACT_ADDRESS[polygon.id]);
 
   const fetchStats = async () => {
     if (!document.hidden) {
+      await setChain();
+
       let gameStatus = await config.getPublicClient().readContract({
-        address: '0x883C084CB430e2E0bE4dBA68B7756ace462E6978',
+        address: contractAddress as `0x${string}`,
         abi: AbiWeb3Button.abi,
         functionName: 'gameStatus',
       }) as GameStatus;
-  
-      setLastPresser(gameStatus[0]);
-      setLastPressTimestamp(gameStatus[1]);
-      setPotBalance(gameStatus[2]);
+
+      if (gameStatus) {
+        setLastPresser(gameStatus[0]);
+        setLastPressTimestamp(gameStatus[1]);
+        setPotBalance(gameStatus[2]);
+      }
     }
   };
+
+  const setChain = async () => {
+    let walletClient = await config.connector?.getWalletClient();
+
+    if (walletClient) {
+      const chainID = await walletClient.getChainId();
+      if (chainID === polygon.id) {
+        setCurrentChain(polygon)
+        setCurrentContractAddress(CONTRACT_ADDRESS[polygon.id])
+      } else if (chainID === base.id) {
+        setCurrentChain(base)
+        setCurrentContractAddress(CONTRACT_ADDRESS[base.id])
+      }
+    }
+  }
 
   useEffect(() => {
     const blinkElement = () => {
       if (lastPresser &&
-          lastPresserRef.current &&
-          prevLastPresserRef.current &&
-          lastPresser !== prevLastPresserRef.current) {
+        lastPresserRef.current &&
+        prevLastPresserRef.current &&
+        lastPresser !== prevLastPresserRef.current) {
 
         lastPresserRef.current.classList.add("blink-border");
 
@@ -96,19 +122,24 @@ function App() {
             </h1>
           </div>
           <div className="flex space-x-4 justify-center items-center h-32">
-            <Button lastPressTime={lastPressTimestamp} lastPresser={lastPresser} />
+            <Button currentChain={currentChain} lastPressTime={lastPressTimestamp} lastPresser={lastPresser} />
           </div>
+
           <div className="max-w-xl mx-auto lg:text-xl text-gray-200 mt-3 leading-normal font-light">
-            Anyone can reset the 60-second timer and add 0.001 Eth to the pot. If the timer reaches 0 on your click, you win the pot!
+            Anyone can reset the 60-second timer and add {currentChain.id === polygon.id ? "1 Matic" : " 0.001 Eth"} to the pot. If the timer reaches 0 on your click, you win the pot!
             <br /> <br />
             Current pot&nbsp;
-            <div className="badge badge-accent text-lg px-2	p-3">
-              {potBalance ? formatEther(potBalance, 'wei') : '0'} Eth
-            </div> Last presser&nbsp;
-            <div id="lastPresser" ref={lastPresserRef} className="badge badge-accent text-lg px-2 p-3">
-              <a href={lastPresser ? `https://basescan.org/address/${lastPresser}` : '#'} target="_blank">{getLastPresser()}</a>
-            </div>
-            
+            {currentChain && currentChain.blockExplorers &&
+              <>
+                <div className="badge badge-accent text-lg px-2	p-3">
+                  {potBalance ? formatEther(potBalance, 'wei') : '0'} {currentChain.id === polygon.id ? "Matic" : "Eth"}
+                </div> Last presser&nbsp;
+                <div id="lastPresser" ref={lastPresserRef} className="badge badge-accent text-lg px-2 p-3">
+                  <a href={lastPresser ? `https://${currentChain.blockExplorers.default.url}/address/${lastPresser}` : '#'} target="_blank">{getLastPresser()}</a>
+                </div>
+              </>
+            }
+
           </div>
         </ConnectKitProvider>
       </WagmiConfig>

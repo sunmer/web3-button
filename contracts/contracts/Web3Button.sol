@@ -41,7 +41,7 @@ contract Web3Button {
   }
 
   function press() external payable {
-    require(msg.value >= 0.001 ether, "You need to send at least 0.001 Eth");
+    require(msg.value >= 1 ether, "You need to send at least 1 Matic");
 
     if(msg.sender == gameStatus.lastPresser && block.timestamp <= gameStatus.lastPressTimestamp + CLAIM_DURATION) {
       revert("You're already the last presser");
@@ -82,7 +82,7 @@ contract Web3Button {
   }
 
   receive() external payable {
-    revert("Contract does not accept direct Ether transfers");
+    revert("Contract does not accept direct transfers");
   }
 
   function withdraw() external onlyOwner {
