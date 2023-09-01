@@ -139,8 +139,11 @@ function App() {
                 </div>
               </>
             }
+
+
+            <p className="pt-5" style={{ marginTop: '80px', fontSize: '14px' }}>Inspired by <a href="https://en.wikipedia.org/wiki/The_Button_(Reddit)" className="underline" target="_blank">The Button</a>,<br /><a href={`${currentChain.blockExplorers?.default.url}/address/${CONTRACT_ADDRESS[currentChain.id]}`} className="underline" target="_blank">Contract</a></p>
           </div>
-          <p className="pt-5">Inspired by <a href="https://en.wikipedia.org/wiki/The_Button_(Reddit)" className="underline" target="_blank">The Button</a></p>
+
         </ConnectKitProvider>
       </WagmiConfig>
     </>
