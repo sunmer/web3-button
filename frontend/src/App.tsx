@@ -135,7 +135,7 @@ function App() {
                   {potBalance ? formatEther(potBalance, 'wei') : '0'} {currentChain.id === polygon.id ? "Matic" : "Eth"}
                 </div> Last presser&nbsp;
                 <div id="lastPresser" ref={lastPresserRef} className="badge badge-accent text-lg px-2 p-3">
-                  <a href={lastPresser ? `https://${currentChain.blockExplorers.default.url}/address/${lastPresser}` : '#'} target="_blank">{getLastPresser()}</a>
+                  <a href={lastPresser ? `${currentChain.blockExplorers.default.url}/address/${lastPresser}` : '#'} target="_blank">{getLastPresser()}</a>
                 </div>
               </>
             }
