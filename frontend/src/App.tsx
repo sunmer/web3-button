@@ -126,7 +126,7 @@ function App() {
           </div>
 
           <div className="max-w-xl mx-auto lg:text-xl text-gray-200 mt-3 leading-normal font-light">
-            Anyone can reset the 60-second timer and add {currentChain.id === polygon.id ? "1 Matic" : " 0.001 Eth"} to the pot. If the timer reaches 0 on your click, you win the pot!
+            Anyone can reset the 60-second timer by adding {currentChain.id === polygon.id ? "1 Matic" : " 0.001 Eth"} to the pot. If the timer reaches 0 on your click, you win the pot!
             <br /> <br />
             Current pot&nbsp;
             {currentChain && currentChain.blockExplorers &&
