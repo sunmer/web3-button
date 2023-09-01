@@ -14,8 +14,17 @@ contract Web3Button {
 
   GameStatus public gameStatus;
 
-  event ButtonPressed(GameStatus gameStatus);
-  event GameWon(address indexed winner);
+  event GameStatusChanged(
+    address indexed lastPresser,
+    uint256 lastPressTimestamp,
+    uint256 potBalance
+  );
+
+  event GameWon(
+    address indexed lastPresser,
+    uint256 lastPressTimestamp,
+    uint256 potBalance
+  );
 
   constructor() {
     owner = msg.sender;
@@ -34,27 +43,25 @@ contract Web3Button {
   function press() external payable {
     require(msg.value >= 0.001 ether, "You need to send at least 0.001 Eth");
 
-    if(isGameActive && msg.sender == gameStatus.lastPresser) {
+    if(msg.sender == gameStatus.lastPresser && block.timestamp <= gameStatus.lastPressTimestamp + CLAIM_DURATION) {
       revert("You're already the last presser");
     }
 
     // Check if the previous game was unclaimed and if it's past the claimDeadline
     if(!isGameActive && block.timestamp > gameStatus.lastPressTimestamp + CLAIM_DURATION) {
-        isGameActive = true;
+      isGameActive = true;
     }
 
     // Check if someone is eligible to claim the pot
-    if(block.timestamp - gameStatus.lastPressTimestamp >= 60 seconds && block.timestamp <= gameStatus.lastPressTimestamp + 300 seconds) {
-        revert("Game has ended. Wait for the restart.");
+    if(block.timestamp - gameStatus.lastPressTimestamp >= 60 seconds && block.timestamp <= gameStatus.lastPressTimestamp + CLAIM_DURATION) {
+      revert("Game has ended. Waiting for the winner to claim the pot.");
     }
-
-    require(isGameActive, "Game has ended. Wait for the restart.");
 
     gameStatus.potBalance += (msg.value * 9) / 10;
     gameStatus.lastPresser = msg.sender;
     gameStatus.lastPressTimestamp = block.timestamp;
 
-    emit ButtonPressed(gameStatus);
+    emit GameStatusChanged(gameStatus.lastPresser, gameStatus.lastPressTimestamp, gameStatus.potBalance);
   }
 
   function claimPot() external onlyLastPresser {
@@ -71,7 +78,7 @@ contract Web3Button {
     (bool success, ) = msg.sender.call{ value: amountToSend }("");
     require(success, "Transfer failed");
 
-    emit GameWon(msg.sender);
+    emit GameWon(msg.sender, block.timestamp, amountToSend);
   }
 
   receive() external payable {

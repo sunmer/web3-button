@@ -1,6 +1,6 @@
 import { ConnectKitProvider, ConnectKitButton, getDefaultConfig } from "connectkit";
 import { WagmiConfig, createConfig } from 'wagmi'
-import { base } from 'viem/chains'
+import { polygon } from 'viem/chains'
 import { default as AbiWeb3Button } from './abi/contracts/Web3Button.sol/Web3Button.json';
 import { formatEther, isAddress } from 'viem';
 import { Button } from "./components/Button"
@@ -20,7 +20,7 @@ function App() {
     getDefaultConfig({
       walletConnectProjectId: "0a0b6f07a3a8536c4a4de2149c7c7369",
       appName: "Web3Button",
-      chains: [base]
+      chains: [polygon]
     }),
   );
 
@@ -41,7 +41,7 @@ function App() {
 
   const fetchStats = async () => {
     let gameStatus = await config.getPublicClient().readContract({
-      address: '0x1cAdC520A5f3305446604932A2935e5985E23Fc4',
+      address: '0x3EA29C7b4fE02FD8FD16e403A247969312b5F79B',
       abi: AbiWeb3Button.abi,
       functionName: 'gameStatus',
     }) as GameStatus;
@@ -77,7 +77,7 @@ function App() {
     const timerID = setInterval(fetchStats, 1000);
 
     return () => clearInterval(timerID);
-  }, [lastPresser]);
+  }, [lastPresser, lastPressTimestamp, potBalance]);
 
   return (
     <>
@@ -107,9 +107,9 @@ function App() {
               {potBalance ? formatEther(potBalance, 'wei') : '0'} Eth
             </div> Last presser&nbsp;
             <div id="lastPresser" ref={lastPresserRef} className="badge badge-accent text-lg px-2 p-3">
-              {getLastPresser()}
+              <a href={lastPresser ? `https://basescan.org/address/${lastPresser}` : '#'} target="_blank">{getLastPresser()}</a>
             </div>
-
+            
           </div>
         </ConnectKitProvider>
       </WagmiConfig>
