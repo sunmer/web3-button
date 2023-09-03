@@ -49,7 +49,7 @@ export function Button({ chain, gameStatus }: { chain: Chain, gameStatus: GameSt
     address: CONTRACT_ADDRESS[chain.id] as `0x${string}`,
     abi: AbiWeb3Button.abi,
     eventName: 'GameStatusChanged',
-    listener(log) {
+    listener() {
       setIsLoadingPress(false);
     },
   })

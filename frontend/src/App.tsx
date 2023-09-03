@@ -3,10 +3,9 @@ import { Config, PublicClient, WebSocketPublicClient, useAccount, useNetwork } f
 import { Chain, base, polygon } from 'viem/chains'
 import { default as AbiWeb3Button } from './abi/contracts/Web3Button.sol/Web3Button.json';
 import { Button } from "./components/Button"
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Instructions } from "./components/Instructions";
 import './App.css'
-import { createPublicClient, http } from "viem";
 
 
 export type GameStatus = [
