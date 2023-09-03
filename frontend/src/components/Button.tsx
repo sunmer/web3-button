@@ -2,57 +2,68 @@ import { default as AbiWeb3Button } from '../abi/contracts/Web3Button.sol/Web3Bu
 import { ConnectKitButton } from "connectkit";
 import { useEffect, useState, useCallback } from 'react';
 import { Chain, parseEther } from 'viem';
-import { polygon } from 'viem/chains'
-import { CONTRACT_ADDRESS } from "../App"
+import { CONTRACT_ADDRESS, GameStatus } from "../App"
 import {
   usePrepareContractWrite,
   useContractWrite,
-  useAccount
+  useAccount,
+  useContractEvent
 } from 'wagmi'
+import { polygon } from '@wagmi/chains';
 
-export function Button({ currentChain, lastPressTime, lastPresser }: { currentChain: Chain, lastPressTime: bigint | null, lastPresser: string | null }) {
+export function Button({ chain, gameStatus }: { chain: Chain, gameStatus: GameStatus }) {
 
   const { address } = useAccount();
 
   const [timer, setTimer] = useState<number>(0);
   const [elapsedTime, setElapsedTime] = useState<number>(0);
-  
+  const [isLoadingPress, setIsLoadingPress] = useState<boolean>(false);
+
   let { config: configClaim, error: errorClaim, refetch: refetchClaimPot } = usePrepareContractWrite({
-    address: CONTRACT_ADDRESS[currentChain.id] as `0x${string}`,
+    address: CONTRACT_ADDRESS[chain.id] as `0x${string}`,
     abi: AbiWeb3Button.abi,
     functionName: 'claimPot',
   });
 
-  let { write: writeClaim, isLoading: isLoadingClaimPot } = useContractWrite(configClaim);
+  let { write: writeClaim } = useContractWrite(configClaim);
 
   let { config: configPress, error: errorPress, refetch: refetchPressButton } = usePrepareContractWrite({
-    address: CONTRACT_ADDRESS[currentChain.id] as `0x${string}`,
+    address: CONTRACT_ADDRESS[chain.id] as `0x${string}`,
     abi: AbiWeb3Button.abi,
     functionName: 'press',
-    value: currentChain.id === polygon.id ? parseEther('1') : parseEther('0.001'),
+    value: chain.id === polygon.id ? parseEther('0.01') : parseEther('0.001')
   });
 
-  const { write: writePress, isLoading: isLoadingPress } = useContractWrite(configPress);
+  const { write: writePress } = useContractWrite(configPress);
 
   const prepareContractWrites = () => {
-    refetchClaimPot();
-    refetchPressButton();
+    if(address) {
+      refetchPressButton();
+    }
+    if(address && address === gameStatus[0]) {
+      refetchClaimPot();
+    }
   };
 
+  useContractEvent({
+    address: CONTRACT_ADDRESS[chain.id] as `0x${string}`,
+    abi: AbiWeb3Button.abi,
+    eventName: 'GameStatusChanged',
+    listener(log) {
+      setIsLoadingPress(false);
+    },
+  })
+
   useEffect(() => {
-    if (!document.hidden && address !== undefined) {
-      if(lastPresser !== null && lastPresser !== address) {
-        prepareContractWrites();
-      } else {
-        const timerID = setInterval(() => {
-          prepareContractWrites();
-        }, 2000);
-        return () => clearInterval(timerID);
-      }
-    }
-  }, [lastPresser, lastPressTime, currentChain]);
-  
+    if(address === gameStatus[0]) 
+      return;
+      
+    prepareContractWrites();
+  }, [chain, gameStatus]);
+
   const pressButton = () => {
+    setIsLoadingPress(true);
+
     if (errorPress) {
       console.log(errorPress);
       return;
@@ -69,12 +80,12 @@ export function Button({ currentChain, lastPressTime, lastPresser }: { currentCh
   }
 
   const updateNumbers = useCallback(() => {
-    const currentElapsedTime = (new Date().getTime() / 1000) - Number(lastPressTime);
+    const currentElapsedTime = (new Date().getTime() / 1000) - Number(gameStatus[1]);
     const elapsedSeconds = 60 - Math.round(currentElapsedTime);
     setTimer(Math.max(0, elapsedSeconds));
     setElapsedTime(currentElapsedTime);
     return currentElapsedTime;
-  }, [lastPressTime]);
+  }, [gameStatus[1]]);
 
   useEffect(() => {
     const timerID = setInterval(() => {
@@ -89,13 +100,18 @@ export function Button({ currentChain, lastPressTime, lastPresser }: { currentCh
         <ConnectKitButton.Custom>
           {({ show }) => (
             <button className="btn btn-secondary btn-lg" onClick={show}>
-              Connect wallet
+              Reset timer
+              <div className="flex flex-col p-2 bg-white rounded-box text-black">
+                <span className="countdown font-mono">
+                  <span style={{ "--value": timer } as React.CSSProperties}></span>
+                </span>
+              </div>
             </button>
           )}
         </ConnectKitButton.Custom>
       </div>
     );
-  } else if (isLoadingClaimPot || isLoadingPress || lastPresser === null || lastPressTime === null) {
+  } else if (isLoadingPress) {
     return (
       <div className="card">
         <button className="btn btn-secondary btn-lg">
@@ -103,7 +119,7 @@ export function Button({ currentChain, lastPressTime, lastPresser }: { currentCh
         </button>
       </div>
     );
-  } else if (address !== lastPresser) {
+  } else if (address !== gameStatus[0]) {
     if (elapsedTime > 60 && elapsedTime <= 300) {
       return (
         <div className="card">
