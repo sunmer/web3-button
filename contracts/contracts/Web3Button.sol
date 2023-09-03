@@ -41,7 +41,7 @@ contract Web3Button {
   }
 
   function press() external payable {
-    require(msg.value >= 1 ether, "You need to send at least 1 Matic");
+    require(msg.value >= 0.5 ether, "Not enough sent to press the button");
 
     if(msg.sender == gameStatus.lastPresser && block.timestamp <= gameStatus.lastPressTimestamp + CLAIM_DURATION) {
       revert("You're already the last presser");
