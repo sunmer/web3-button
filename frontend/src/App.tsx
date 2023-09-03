@@ -27,13 +27,13 @@ function App({ config }: { config: Config<PublicClient, WebSocketPublicClient> }
   const { isConnected } = useAccount()
 
   const fetchStats = async () => {
-    if(document.hidden)
+    if (document.hidden)
       return;
 
-    if(!isConnected) {
+    if (!isConnected) {
       setChain(polygon);
     } else if (isConnected) {
-      if(connectedChain) {
+      if (connectedChain) {
         setChain(connectedChain);
       }
     }
@@ -70,11 +70,20 @@ function App({ config }: { config: Config<PublicClient, WebSocketPublicClient> }
           Web3 Button
         </h1>
       </div>
-      <div className="flex space-x-4 justify-center items-center h-32">
-        {gameStatus && chain && (<Button chain={chain} gameStatus={gameStatus} />)}
-      </div>
-
-      {gameStatus && chain && (<Instructions chain={chain} gameStatus={gameStatus} />)}
+      {gameStatus && chain && (
+        <>
+          <div className="flex space-x-4 justify-center items-center h-32">
+            <Button chain={chain} gameStatus={gameStatus} />
+          </div>
+          <Instructions chain={chain} gameStatus={gameStatus} />
+        </>
+      )}
+      {!gameStatus && (
+        <div className="flex space-x-4 justify-center items-center h-32">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+        )
+      }
     </>
   )
 }
