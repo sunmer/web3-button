@@ -31,7 +31,7 @@ export function Button({ chain, gameStatus }: { chain: Chain, gameStatus: GameSt
     address: CONTRACT_ADDRESS[chain.id] as `0x${string}`,
     abi: AbiWeb3Button.abi,
     functionName: 'press',
-    value: chain.id === polygon.id ? parseEther('0.01') : parseEther('0.001')
+    value: chain.id === polygon.id ? parseEther('0.5') : parseEther('0.001')
   });
 
   const { write: writePress } = useContractWrite(configPress);

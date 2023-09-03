@@ -1,11 +1,12 @@
 import { ConnectKitButton } from "connectkit";
-import { Config, PublicClient, WebSocketPublicClient, useNetwork } from 'wagmi'
-import { base, polygon } from 'viem/chains'
+import { Config, PublicClient, WebSocketPublicClient, useAccount, useNetwork } from 'wagmi'
+import { Chain, base, polygon } from 'viem/chains'
 import { default as AbiWeb3Button } from './abi/contracts/Web3Button.sol/Web3Button.json';
 import { Button } from "./components/Button"
 import { useState, useEffect, useRef } from "react";
 import { Instructions } from "./components/Instructions";
 import './App.css'
+import { createPublicClient, http } from "viem";
 
 
 export type GameStatus = [
@@ -22,19 +23,30 @@ export const CONTRACT_ADDRESS: { [key: number]: string } = {
 function App({ config }: { config: Config<PublicClient, WebSocketPublicClient> }) {
 
   const [gameStatus, setGameStatus] = useState<GameStatus | undefined>(undefined);
-  const { chain } = useNetwork();
+  const [chain, setChain] = useState<Chain>(polygon);
+  const { chain: connectedChain } = useNetwork();
+  const { isConnected } = useAccount()
 
   const fetchStats = async () => {
-    if (!document.hidden && chain) {
-      let gameStatus = await config.getPublicClient().readContract({
-        address: CONTRACT_ADDRESS[chain.id] as `0x${string}`,
-        abi: AbiWeb3Button.abi,
-        functionName: 'gameStatus',
-      }) as GameStatus;
+    if(document.hidden)
+      return;
 
-      if (gameStatus) {
-        setGameStatus(gameStatus)
+    if(!isConnected) {
+      setChain(polygon);
+    } else if (isConnected) {
+      if(connectedChain) {
+        setChain(connectedChain);
       }
+    }
+
+    let gameStatus = await config.getPublicClient().readContract({
+      address: CONTRACT_ADDRESS[chain.id] as `0x${string}`,
+      abi: AbiWeb3Button.abi,
+      functionName: 'gameStatus',
+    }) as GameStatus;
+
+    if (gameStatus) {
+      setGameStatus(gameStatus)
     }
   };
 
