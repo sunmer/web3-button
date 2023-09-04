@@ -30,23 +30,25 @@ function App({ config }: { config: Config<PublicClient, WebSocketPublicClient> }
     if (document.hidden)
       return;
 
-    if (!isConnected) {
-      setChain(polygon);
-    } else if (isConnected) {
-      if (connectedChain) {
-        setChain(connectedChain);
+    const determineTargetChain = () => {
+      if (isConnected && connectedChain) {
+        return connectedChain;
       }
-    }
+      return polygon;
+    };
+    
+    let targetChain = determineTargetChain();
+    setChain(targetChain)
+    let gameStatus: GameStatus;
 
-    let gameStatus = await config.getPublicClient().readContract({
-      address: CONTRACT_ADDRESS[chain.id] as `0x${string}`,
+    gameStatus = await config.getPublicClient().readContract({
+      address: CONTRACT_ADDRESS[targetChain.id] as `0x${string}`,
       abi: AbiWeb3Button.abi,
       functionName: 'gameStatus',
-    }) as GameStatus;
 
-    if (gameStatus) {
-      setGameStatus(gameStatus)
-    }
+    }).catch(() => ['0x0000000000000000000000000000000000000000', 0n, 0n]) as GameStatus; 
+    
+    setGameStatus(gameStatus)
   };
 
   useEffect(() => {
