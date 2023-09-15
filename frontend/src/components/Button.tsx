@@ -18,6 +18,7 @@ export function Button({ chain, gameStatus }: { chain: Chain, gameStatus: GameSt
   const [timer, setTimer] = useState<number>(0);
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [isLoadingPress, setIsLoadingPress] = useState<boolean>(false);
+  const [isLoadingClaim, setIsLoadingClaim] = useState<boolean>(false);
 
   let { config: configClaim, error: errorClaim, refetch: refetchClaimPot } = usePrepareContractWrite({
     address: CONTRACT_ADDRESS[chain.id] as `0x${string}`,
@@ -25,7 +26,7 @@ export function Button({ chain, gameStatus }: { chain: Chain, gameStatus: GameSt
     functionName: 'claimPot',
   });
 
-  let { write: writeClaim } = useContractWrite(configClaim);
+  let { write: writeClaim, status: writeStatus } = useContractWrite(configClaim);
 
   let { config: configPress, error: errorPress, refetch: refetchPressButton } = usePrepareContractWrite({
     address: CONTRACT_ADDRESS[chain.id] as `0x${string}`,
@@ -37,37 +38,35 @@ export function Button({ chain, gameStatus }: { chain: Chain, gameStatus: GameSt
   const { write: writePress } = useContractWrite(configPress);
 
   const prepareContractWrites = () => {
-    if(address) {
-      refetchPressButton();
-    }
-    if(address && address === gameStatus[0]) {
-      refetchClaimPot();
-    }
+    refetchPressButton();
+    refetchClaimPot();
   };
-
-  useContractEvent({
-    address: CONTRACT_ADDRESS[chain.id] as `0x${string}`,
-    abi: AbiWeb3Button.abi,
-    eventName: 'GameStatusChanged',
-    listener() {
-      setIsLoadingPress(false);
-    },
-  })
 
   useEffect(() => {
     if(address === gameStatus[0]) 
-      return;
-      
+      setIsLoadingPress(false);
+
+    if(gameStatus[0] === '0x0000000000000000000000000000000000000000')
+      setIsLoadingClaim(false);
+
     prepareContractWrites();
   }, [chain, gameStatus]);
 
-  const pressButton = () => {
-    setIsLoadingPress(true);
+  useEffect(() => {
+    console.log(writeStatus)
+  }, [writeStatus]);
+
+  const pressButton = async () => {
+    // @ts-ignore
+    gtag('event', 'click_button');
 
     if (errorPress) {
       console.log(errorPress);
       return;
     }
+
+    setIsLoadingPress(true);
+
     writePress?.();
   }
 
@@ -76,6 +75,9 @@ export function Button({ chain, gameStatus }: { chain: Chain, gameStatus: GameSt
       console.log(errorClaim);
       return;
     }
+
+    setIsLoadingClaim(true);
+    
     writeClaim?.();
   }
 
@@ -115,6 +117,16 @@ export function Button({ chain, gameStatus }: { chain: Chain, gameStatus: GameSt
     return (
       <div className="card">
         <button className="btn btn-secondary btn-lg">
+          Pressing button..
+          <span className="loading loading-spinner"></span>
+        </button>
+      </div>
+    );
+  } else if (isLoadingClaim) {
+    return (
+      <div className="card">
+        <button className="btn btn-secondary btn-lg">
+          Claiming pot..
           <span className="loading loading-spinner"></span>
         </button>
       </div>
