@@ -6,8 +6,7 @@ import { CONTRACT_ADDRESS, GameStatus } from "../App"
 import {
   usePrepareContractWrite,
   useContractWrite,
-  useAccount,
-  useContractEvent
+  useAccount
 } from 'wagmi'
 import { polygon } from '@wagmi/chains';
 
