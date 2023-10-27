@@ -1,4 +1,4 @@
-# web3-button
+# The Web3 Button
 A social experiment built in web3. Anyone can reset the 60-second timer by adding some Matic or Eth to the pot. If the timer reaches 0 on your click, you win the pot!
 
 Inspired by, https://en.wikipedia.org/wiki/The_Button_(Reddit)
